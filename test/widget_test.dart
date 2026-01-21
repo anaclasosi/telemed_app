@@ -1,30 +1,22 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Testes básicos do App Amamenta
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:app_amamenta/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App deve inicializar com o cronômetro em 00:00', (WidgetTester tester) async {
+    // Build do app e dispara um frame
+    await tester.pumpWidget(const AppAmamenta());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verifica se o cronômetro começa em 00:00
+    expect(find.text('00 : 00'), findsOneWidget);
+    
+    // Verifica se os botões Esquerdo e Direito estão presentes
+    expect(find.text('Esquerdo'), findsOneWidget);
+    expect(find.text('Direito'), findsOneWidget);
+    
+    // Verifica se o botão de entrada manual está presente
+    expect(find.text('Entrada Manual'), findsOneWidget);
   });
 }
