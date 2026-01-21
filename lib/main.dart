@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'screens/auth_screen.dart';
 import 'screens/breastfeeding_tracker_screen.dart';
 
 /// Ponto de entrada do aplicativo
@@ -51,8 +52,12 @@ class AppAmamenta extends StatelessWidget {
           ),
         ),
       ),
-      // Tela inicial do app
-      home: const BreastfeedingTrackerScreen(),
+      // Tela inicial do app (Login/Cadastro)
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AuthScreen(),
+        '/home': (context) => const BreastfeedingTrackerScreen(),
+      },
     );
   }
 }

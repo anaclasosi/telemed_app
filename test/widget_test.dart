@@ -5,18 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:app_amamenta/main.dart';
 
 void main() {
-  testWidgets('App deve inicializar com o cronômetro em 00:00', (WidgetTester tester) async {
+  testWidgets('App deve inicializar com a tela de login', (WidgetTester tester) async {
     // Build do app e dispara um frame
     await tester.pumpWidget(const AppAmamenta());
 
-    // Verifica se o cronômetro começa em 00:00
-    expect(find.text('00 : 00'), findsOneWidget);
+    // Verifica se está na tela de login
+    expect(find.text('Bem-vindo de volta'), findsOneWidget);
     
-    // Verifica se os botões Esquerdo e Direito estão presentes
-    expect(find.text('Esquerdo'), findsOneWidget);
-    expect(find.text('Direito'), findsOneWidget);
-    
-    // Verifica se o botão de entrada manual está presente
-    expect(find.text('Entrada Manual'), findsOneWidget);
+    // Verifica se o botão de entrar está presente
+    expect(find.text('ENTRAR'), findsOneWidget);
   });
 }
