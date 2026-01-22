@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/auth_screen.dart';
 import 'screens/breastfeeding_tracker_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/analytics_screen.dart';
+import 'screens/diary_screen.dart';
 
 /// Ponto de entrada do aplicativo
 void main() {
@@ -57,6 +60,9 @@ class AppAmamenta extends StatelessWidget {
       routes: {
         '/': (context) => const AuthScreen(),
         '/home': (context) => const BreastfeedingTrackerScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/analytics': (context) => const AnalyticsScreen(),
+        '/diary': (context) => const DiaryScreen(),
       },
     );
   }
