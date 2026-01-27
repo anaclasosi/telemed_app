@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Tela de autenticação que alterna dinamicamente entre Login e Cadastro
 /// Utiliza AnimatedSwitcher para transições suaves entre os estados
@@ -16,20 +17,59 @@ class _AuthScreenState extends State<AuthScreen> {
   // Controle de visibilidade da senha
   bool _obscurePassword = true;
   
-  // Controllers para os campos de texto
+  // Controllers para os campos de texto do usuário
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   
+  // Controllers para informações dos bebês
+  final List<Map<String, TextEditingController>> _babiesControllers = [];
+  
   // Chave do formulário para validação
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Adiciona um bebê por padrão
+    _addBaby();
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    // Limpar controllers dos bebês
+    for (var babyControllers in _babiesControllers) {
+      babyControllers['name']?.dispose();
+      babyControllers['ageInMonths']?.dispose();
+      babyControllers['weightInKg']?.dispose();
+    }
     super.dispose();
+  }
+
+  /// Adiciona um novo bebê à lista
+  void _addBaby() {
+    setState(() {
+      _babiesControllers.add({
+        'name': TextEditingController(),
+        'ageInMonths': TextEditingController(),
+        'weightInKg': TextEditingController(),
+      });
+    });
+  }
+
+  /// Remove um bebê da lista
+  void _removeBaby(int index) {
+    if (_babiesControllers.length > 1) {
+      setState(() {
+        _babiesControllers[index]['name']?.dispose();
+        _babiesControllers[index]['ageInMonths']?.dispose();
+        _babiesControllers[index]['weightInKg']?.dispose();
+        _babiesControllers.removeAt(index);
+      });
+    }
   }
 
   /// Alterna entre modo Login e Cadastro
@@ -38,16 +78,31 @@ class _AuthScreenState extends State<AuthScreen> {
       _isLogin = !_isLogin;
       // Limpa o formulário ao alternar
       _formKey.currentState?.reset();
+      
+      // Se estiver indo para o cadastro e não houver bebês, adiciona um
+      if (!_isLogin && _babiesControllers.isEmpty) {
+        _addBaby();
+      }
     });
   }
 
   /// Processa o login ou cadastro
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
+      // Se for cadastro, mostrar informações dos bebês
+      if (!_isLogin) {
+        for (int i = 0; i < _babiesControllers.length; i++) {
+          final controllers = _babiesControllers[i];
+          debugPrint('Bebê ${i + 1}: ${controllers['name']!.text}, '
+              '${controllers['ageInMonths']!.text} meses, '
+              '${controllers['weightInKg']!.text}kg');
+        }
+      }
+      
       // Aqui você implementaria a lógica de autenticação
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isLogin ? 'Login realizado!' : 'Cadastro realizado!'),
+          content: Text(_isLogin ? 'Login realizado!' : 'Cadastro realizado com sucesso!'),
           backgroundColor: const Color(0xFFFF4081),
         ),
       );
@@ -239,6 +294,174 @@ class _AuthScreenState extends State<AuthScreen> {
               return null;
             },
           ),
+          
+          // Informações dos bebês (apenas no cadastro)
+          if (!_isLogin) ...[
+            const SizedBox(height: 32),
+            _buildBabiesSection(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Constrói a seção de informações dos bebês
+  Widget _buildBabiesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Título da seção
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Informações do(s) Bebê(s)',
+              style: TextStyle(
+                color: Color(0xFFFF4081),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (_babiesControllers.length < 3)
+              IconButton(
+                icon: const Icon(
+                  Icons.add_circle,
+                  color: Color(0xFFFF4081),
+                ),
+                onPressed: _addBaby,
+                tooltip: 'Adicionar outro bebê (gêmeos)',
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _babiesControllers.length > 1
+              ? 'Cadastre as informações de cada bebê'
+              : 'Preencha as informações do bebê',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        // Lista de bebês
+        ...List.generate(_babiesControllers.length, (index) {
+          return _buildBabyForm(index);
+        }),
+      ],
+    );
+  }
+
+  /// Constrói o formulário para um bebê
+  Widget _buildBabyForm(int index) {
+    final controllers = _babiesControllers[index];
+    final babyNumber = _babiesControllers.length > 1 ? ' ${index + 1}' : '';
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF3D2A47).withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFFF4081).withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Cabeçalho do card do bebê
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.child_care,
+                    color: Color(0xFFFF4081),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Bebê$babyNumber',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              if (_babiesControllers.length > 1)
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                    size: 20,
+                  ),
+                  onPressed: () => _removeBaby(index),
+                  tooltip: 'Remover bebê',
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Nome do bebê
+          _buildTextField(
+            controller: controllers['name']!,
+            label: 'Nome do Bebê',
+            icon: Icons.baby_changing_station,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Insira o nome do bebê';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 12),
+          
+          // Idade em meses
+          _buildTextField(
+            controller: controllers['ageInMonths']!,
+            label: 'Idade (meses)',
+            icon: Icons.calendar_today,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Insira a idade em meses';
+              }
+              final age = int.tryParse(value);
+              if (age == null || age < 0 || age > 36) {
+                return 'Idade deve estar entre 0 e 36 meses';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 12),
+          
+          // Peso em kg
+          _buildTextField(
+            controller: controllers['weightInKg']!,
+            label: 'Peso (kg)',
+            icon: Icons.monitor_weight,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            ],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Insira o peso do bebê';
+              }
+              final weight = double.tryParse(value);
+              if (weight == null || weight <= 0 || weight > 20) {
+                return 'Peso deve estar entre 0 e 20 kg';
+              }
+              return null;
+            },
+          ),
         ],
       ),
     );
@@ -251,12 +474,14 @@ class _AuthScreenState extends State<AuthScreen> {
     required IconData icon,
     bool isPassword = false,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: isPassword && _obscurePassword,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       style: const TextStyle(color: Colors.white),
       validator: validator,
       decoration: InputDecoration(

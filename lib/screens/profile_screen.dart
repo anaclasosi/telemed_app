@@ -485,7 +485,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFFFF4081),
+      activeThumbColor: const Color(0xFFFF4081),
       activeTrackColor: const Color(0xFFFF4081).withValues(alpha: 0.5),
     );
   }
